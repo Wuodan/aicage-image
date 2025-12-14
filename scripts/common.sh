@@ -10,23 +10,16 @@ _die() {
   fi
 }
 
-load_env_file() {
-  local env_file="${ROOT_DIR}/.env"
+load_config_file() {
+  local config_file="${ROOT_DIR}/config.yaml"
+  [[ -f "${config_file}" ]] || _die "Config file not found: ${config_file}"
 
-  # The read condition handles files that omit a trailing newline.
-  while IFS= read -r line || [[ -n "${line}" ]]; do
-    [[ -z "${line}" || "${line}" =~ ^[[:space:]]*# ]] && continue
-    if [[ "${line}" =~ ^([^=]+)=(.*)$ ]]; then
-      local key="${BASH_REMATCH[1]}"
-      local value="${BASH_REMATCH[2]}"
-      if [[ -z ${!key+x} ]]; then
-        if [[ "${value}" =~ ^\".*\"$ ]]; then
-          value="${value:1:${#value}-2}"
-        fi
-        export "${key}=${value}"
-      fi
+  while IFS=$'\t' read -r key value; do
+    [[ -z "${key}" ]] && continue
+    if [[ -z ${!key+x} ]]; then
+      export "${key}=${value}"
     fi
-  done < "${env_file}"
+  done < <(yq -er 'to_entries[] | [.key, (.value // "")] | @tsv' "${config_file}")
 }
 
 discover_base_aliases() {

@@ -75,7 +75,7 @@ done
 
 [[ -n "${TOOL}" && -n "${BASE_ALIAS}" ]] || die "--tool and --base are required"
 
-load_env_file
+load_config_file
 
 TARGET="${TOOL}-${BASE_ALIAS}"
 BASE_IMAGE="${AICAGE_BASE_REPOSITORY}:${BASE_ALIAS}-latest"

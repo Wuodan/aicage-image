@@ -14,7 +14,7 @@ Usage: scripts/build-all.sh [build-options]
 
 Builds the full matrix of <tool>-<base> combinations. Any options after the script name are
 forwarded to scripts/build.sh for each build (e.g., --platform). Platforms must come from --platform
-or environment (.env).
+or environment (config.yaml).
 
 Options:
   --platform <value>  Build only a single platform (e.g., linux/amd64)
@@ -32,7 +32,7 @@ if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
   usage
 fi
 
-load_env_file
+load_config_file
 
 PUSH_FLAG=
 TOOLS_DIR="${ROOT_DIR}/tools"

@@ -32,7 +32,7 @@ jobs:
           set -euo pipefail
           ROOT_DIR="$(pwd)"
           source scripts/common.sh
-          load_env_file
+          load_config_file
           BASE_ALIASES="$(discover_base_aliases)"
           for BASE_ALIAS in ${BASE_ALIASES}; do
             echo "Dispatching ${TOOL} (${BASE_ALIAS}) for ${REF}"

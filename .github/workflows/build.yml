@@ -66,7 +66,7 @@ jobs:
         run: |
           set -euo pipefail
           source scripts/common.sh
-          load_env_file
+          load_config_file
           scripts/build.sh \
             --tool "${TOOL}" \
             --base "${BASE_ALIAS}" \
@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           source scripts/common.sh
-          load_env_file
+          load_config_file
           IMAGE="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
           scripts/test.sh --image "${IMAGE}"
 
@@ -94,7 +94,7 @@ jobs:
         run: |
           set -euo pipefail
           source scripts/common.sh
-          load_env_file
+          load_config_file
           scripts/build.sh \
             --tool "${TOOL}" \
             --base "${BASE_ALIAS}" \
