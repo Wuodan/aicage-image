@@ -1,4 +1,5 @@
 name: Build Agent Image (Template)
+run-name: Build ${{ inputs.tool }} (${{ inputs.base }})
 
 "on":
   workflow_call:
@@ -7,14 +8,29 @@ name: Build Agent Image (Template)
         description: Tool name to build (matches tools/<tool>)
         required: true
         type: string
+      base:
+        description: Base alias to build (from scripts/common.sh discover_base_aliases)
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tool:
+        description: Tool name to build (matches tools/<tool>)
+        required: true
+        type: string
+      base:
+        description: Base alias to build (from scripts/common.sh discover_base_aliases)
+        required: true
+        type: string
 
 jobs:
   build:
-    name: Build, test, and publish ${{ inputs.tool }}
+    name: Build, test, and publish ${{ inputs.tool }} (${{ inputs.base }})
     runs-on: ubuntu-latest
 
     env:
       TOOL: ${{ inputs.tool }}
+      BASE_ALIAS: ${{ inputs.base }}
       AICAGE_VERSION: ${{ github.ref_name }}
       ROOT_DIR: ${{ github.workspace }}
 
@@ -46,30 +62,24 @@ jobs:
       - name: "Test: Setup BATS testing framework"
         uses: mig4/setup-bats@v1.2.0
 
-      - name: "Test: Build final images for smoke tests"
+      - name: "Test: Build final image for smoke tests"
         run: |
           set -euo pipefail
           source scripts/common.sh
           load_env_file
-          BASE_ALIASES="$(discover_base_aliases)"
-          for BASE_ALIAS in ${BASE_ALIASES}; do
-            scripts/build.sh \
-              --tool "${TOOL}" \
-              --base "${BASE_ALIAS}" \
-              --platform linux/amd64 \
-              --version "${AICAGE_VERSION}"
-          done
+          scripts/build.sh \
+            --tool "${TOOL}" \
+            --base "${BASE_ALIAS}" \
+            --platform linux/amd64 \
+            --version "${AICAGE_VERSION}"
 
-      - name: "Test: Run smoke suites on final images"
+      - name: "Test: Run smoke suites on final image"
         run: |
           set -euo pipefail
           source scripts/common.sh
           load_env_file
-          BASE_ALIASES="$(discover_base_aliases)"
-          for BASE_ALIAS in ${BASE_ALIASES}; do
-            IMAGE="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
-            scripts/test.sh --image "${IMAGE}"
-          done
+          IMAGE="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
+          scripts/test.sh --image "${IMAGE}"
 
       - name: "Publish: Set up QEMU"
         uses: docker/setup-qemu-action@v3.7.0
@@ -80,16 +90,13 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: "Publish: Build and push all images"
+      - name: "Publish: Build and push image"
         run: |
           set -euo pipefail
           source scripts/common.sh
           load_env_file
-          BASE_ALIASES="$(discover_base_aliases)"
-          for BASE_ALIAS in ${BASE_ALIASES}; do
-            scripts/build.sh \
-              --tool "${TOOL}" \
-              --base "${BASE_ALIAS}" \
-              --version "${AICAGE_VERSION}" \
-              --push
-          done
+          scripts/build.sh \
+            --tool "${TOOL}" \
+            --base "${BASE_ALIAS}" \
+            --version "${AICAGE_VERSION}" \
+            --push
