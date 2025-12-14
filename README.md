@@ -1,56 +1,44 @@
 # aicage-image
 
-Final Docker images for AI coding agents (`cline`, `codex`, `droid`). Base layers live in the
-`aicage-image-base` repo; this repo consumes `${AICAGE_BASE_REPOSITORY}:<alias>-latest` tags to build
-the agent layers.
+Final Docker images for [aicage](https://github.com/Wuodan/aicage). These images bundle the agent binaries on top of published
+base layers from `wuodan/aicage-image-base`.
 
-## Layout
+## What’s included
 
-- `Dockerfile` / `docker-bake.hcl` — Buildx entrypoints for agent images.
-- `scripts/` — Build/test helpers.
-- `tools/` — Tool folders with per-tool `install.sh`.
-- `tests/smoke/` — Bats smoke suite shared by all tools.
-- `.env` — Defaults for repositories and platforms.
+- Agents: `cline`, `codex`, and `droid`.
+- Bases: aliases such as `ubuntu`, `fedora`, and `act` (discovered from base-layer tags).
+- Multi-arch support: `linux/amd64` and `linux/arm64`.
 
-## Build
+## Tag format
 
-Make sure the base images you want to consume exist at `${AICAGE_BASE_REPOSITORY}`.
+`${AICAGE_REPOSITORY:-wuodan/aicage}:<tool>-<base>-<version>`
 
-```bash
-# Build and load a single agent image
-scripts/build.sh --tool codex --base ubuntu --platform linux/amd64
+- Example: `wuodan/aicage:codex-ubuntu-latest`
+- `<base>-latest` tags map to the latest published base layer with that alias.
 
-# Build the full tool/base matrix
-scripts/build-all.sh --platform linux/amd64
-```
-
-## Test
+## Quick start
 
 ```bash
-# Test a single image
-scripts/test.sh --image wuodan/aicage:codex-ubuntu-latest
+docker pull wuodan/aicage:codex-ubuntu-latest
 
-# Test the full matrix (tags derived from .env)
-scripts/test-all.sh
+docker run -it --rm \
+  -e OPENAI_API_KEY=sk-... \
+  -e AICAGE_UID=$(id -u) \
+  -e AICAGE_GID=$(id -g) \
+  -e AICAGE_USER=$(id -un) \
+  -v "$(pwd)":/workspace \
+  wuodan/aicage:cline-ubuntu-latest
 ```
 
-## GitHub Actions
+Swap `codex` for `cline` or `droid`, and choose any available `<base>` alias.
 
-`.github/workflows/agent-image.yml` is the template; `agent-cline.yml`, `agent-codex.yml`, and
-`agent-droid.yml` call it to build/test/push a single tool against all bases. Run locally (expected
-to fail at Docker Hub login without creds) with:
+## Behavior inside the container
 
-```bash
-act -W .github/workflows/build-cline.yml -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
-```
+- Starts as root, then creates a user matching `AICAGE_UID`/`AICAGE_GID`/`AICAGE_USER` (defaults
+  `1000`/`1000`/`aicage`) and switches into it.
+- `/workspace` is created and owned by that user; mount your project there.
 
-## Configuration
+## Contributing
 
-Key `.env` variables (can be overridden via environment):
-- `AICAGE_REPOSITORY` — Target repo for agent images (default `wuodan/aicage`).
-- `AICAGE_BASE_REPOSITORY` — Source repo for base layers (default `wuodan/aicage-image-base`).
-- `AICAGE_VERSION` — Tag suffix, appended as `<tool>-<base>-<version>` (default `dev`).
-- `AICAGE_PLATFORMS` — Space-separated platform list.
-
-Tools are discovered from subfolders under `tools/`; add a folder with an `install.sh` to introduce a
-new tool.
+See `DEVELOPMENT.md` for build, test, and release guidance. AI coding agents should also read
+`AGENTS.md`.
