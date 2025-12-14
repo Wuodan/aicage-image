@@ -23,6 +23,10 @@ run-name: Build ${{ inputs.tool }} (${{ inputs.base }})
         required: true
         type: string
 
+concurrency:
+  group: build-${{ inputs.tool }}-${{ inputs.base }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build, test, and publish ${{ inputs.tool }} (${{ inputs.base }})
