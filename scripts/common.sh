@@ -33,3 +33,15 @@ discover_base_aliases() {
     url="${next}"
   done
 }
+
+get_tool_metadata() {
+  local tool="$1"
+  local tool_dir="${ROOT_DIR}/tools/${tool}"
+  local definition_file="${tool_dir}/tool.yaml"
+
+  [[ -d "${tool_dir}" ]] || _die "Tool '${tool}' not found under ${ROOT_DIR}/tools"
+  [[ -f "${definition_file}" ]] || _die "Missing tool.yaml for '${tool}'"
+  [[ -s "${definition_file}" ]] || _die "tool.yaml for '${tool}' is empty"
+
+  yq -er 'to_entries[] | [.key, (.value // "")] | @tsv' "${definition_file}"
+}

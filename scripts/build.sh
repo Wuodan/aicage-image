@@ -81,6 +81,12 @@ TARGET="${TOOL}-${BASE_ALIAS}"
 BASE_IMAGE="${AICAGE_BASE_REPOSITORY}:${BASE_ALIAS}-latest"
 TAG="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
 DESCRIPTION="Agent image for ${TOOL}"
+TOOL_LABEL_SETS=()
+
+while IFS=$'\t' read -r key value; do
+  [[ -z "${key}" ]] && continue
+  TOOL_LABEL_SETS+=("--set" "agent.labels.${key}=${value}")
+done < <(get_tool_metadata "${TOOL}")
 
 echo "[build] Target=${TARGET} Platforms=${AICAGE_PLATFORMS} Repo=${AICAGE_REPOSITORY} Tag=${TAG} BaseImage=${BASE_IMAGE} Mode=${PUSH_MODE}" >&2
 env \
@@ -94,4 +100,5 @@ env \
     --set "agent.args.TOOL=${TOOL}" \
     --set "agent.tags=${TAG}" \
     --set "agent.labels.org.opencontainers.image.description=${DESCRIPTION}" \
+    "${TOOL_LABEL_SETS[@]}" \
     "${PUSH_MODE}"

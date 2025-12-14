@@ -8,6 +8,7 @@ adjust Dockerfiles/Bake targets, or update smoke tests.
 - Docker with Buildx (`docker buildx version`).
 - QEMU/binfmt for multi-arch builds (often installed with Docker Desktop).
 - Bats (`bats --version`) for smoke suites.
+- yq (`yq --version`) for parsing config and tool metadata.
 - Python 3.11+ with `pip install -r requirements-dev.txt` to pull lint/test tooling (e.g., ruff,
   pymarkdown).
 
@@ -22,6 +23,7 @@ pip install -r requirements-dev.txt
 
 - `Dockerfile` / `docker-bake.hcl` — Buildx entrypoints for agent images.
 - `tools/<tool>/install.sh` — Installer for each agent.
+- `tools/<tool>/tool.yaml` — Key/value metadata labels baked into the image.
 - `scripts/` — Build and test helpers.
 - `tests/smoke/` — Bats suites that verify each tool’s image.
 - `config.yaml` — Default repositories, platforms, and version tags.
@@ -62,9 +64,10 @@ Smoke suites live in `tests/smoke/`; use `bats` directly if you need to run one 
 ## Adding a tool
 
 1. Create `tools/<tool>/install.sh` (executable) that installs the agent; fail fast on errors.
-2. Add the tool to `AICAGE_TOOLS` in `config.yaml` if it isn’t discovered automatically.
-3. Add smoke coverage in `tests/smoke/<tool>.bats`.
-4. Document the tool in `README.md` if it should be visible to users.
+2. Add `tools/<tool>/tool.yaml` with any metadata that should appear as image labels.
+3. Add the tool to `AICAGE_TOOLS` in `config.yaml` if it isn’t discovered automatically.
+4. Add smoke coverage in `tests/smoke/<tool>.bats`.
+5. Document the tool in `README.md` if it should be visible to users.
 
 ## Working with bases
 
