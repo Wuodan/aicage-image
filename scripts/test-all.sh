@@ -21,6 +21,6 @@ for tool_dir in "${TOOLS_DIR}"/*; do
   for BASE_ALIAS in ${AICAGE_BASE_ALIASES}; do
     IMAGE="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
     echo "[test-all] Testing ${IMAGE}" >&2
-    "${ROOT_DIR}/scripts/test.sh" --image "${IMAGE}" -- "$@"
+    "${ROOT_DIR}/scripts/test.sh" --image "${IMAGE}" --tool "${TOOL}" "$@"
   done
 done

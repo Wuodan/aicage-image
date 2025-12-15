@@ -4,18 +4,20 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SMOKE_DIR="${ROOT_DIR}/tests/smoke"
 IMAGE_REF=""
+TOOL=""
 BATS_TOOL_FILE="${SMOKE_DIR}/tool.bats"
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/test.sh --image <image-ref> [options] [-- <bats-args>]
+Usage: scripts/test.sh --image <image-ref> --tool <tool> [bats-args...]
 
 Options:
   --image <ref>   Image reference to test (required)
+  --tool <tool>   Tool name for smoke tests (required)
   -h, --help      Show this help and exit
 
 Examples:
-  scripts/test.sh --image example/aicage:codex-ubuntu-24.04-latest
+  scripts/test.sh --image example/aicage:codex-ubuntu-24.04-latest --tool codex
 USAGE
   exit 1
 }
@@ -34,6 +36,11 @@ while [[ $# -gt 0 ]]; do
       IMAGE_REF="$2"
       shift 2
       ;;
+    --tool)
+      [[ $# -ge 2 ]] || usage
+      TOOL="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       ;;
@@ -44,6 +51,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "${IMAGE_REF}" ]] || { log "--image is required"; usage; }
+[[ -n "${TOOL}" ]] || { log "--tool is required"; usage; }
 
 if [[ ! -e "${BATS_TOOL_FILE}" ]]; then
   log "Smoke tests not found at ${BATS_TOOL_FILE}."
@@ -51,4 +59,4 @@ if [[ ! -e "${BATS_TOOL_FILE}" ]]; then
 fi
 
 log "Running smoke tests via bats"
-AICAGE_IMAGE="${IMAGE_REF}" bats "${BATS_TOOL_FILE}" "$@"
+AICAGE_IMAGE="${IMAGE_REF}" TOOL="${TOOL}" bats "${BATS_TOOL_FILE}" "$@"

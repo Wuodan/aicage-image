@@ -67,7 +67,7 @@ jobs:
           source scripts/common.sh
           load_config_file
           IMAGE="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
-          scripts/test.sh --image "${IMAGE}"
+          scripts/test.sh --image "${IMAGE}" --tool "${TOOL}"
 
       - name: "Publish: Set up QEMU"
         uses: docker/setup-qemu-action@v3.7.0
