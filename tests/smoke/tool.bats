@@ -15,19 +15,19 @@ setup() {
 }
 
 @test "test_boots_container" {
-  run docker run --rm "${AICAGE_IMAGE}" /bin/bash -lc "echo ${TOOL}-boot && whoami"
+  run docker run --rm "${AICAGE_IMAGE}" /bin/bash -c "echo ${TOOL}-boot && whoami"
   [ "$status" -eq 0 ]
   [[ "$output" == *"${TOOL}-boot"* ]]
 }
 
 @test "test_agent_binary_present" {
-  run docker run --rm "${AICAGE_IMAGE}" /bin/bash -lc "command -v ${TOOL}"
+  run docker run --rm "${AICAGE_IMAGE}" /bin/bash -c "command -v ${TOOL}"
   [ "$status" -eq 0 ]
   [[ "$output" == *"${TOOL}"* ]]
 }
 
 @test "test_required_packages" {
-  run docker run --rm "${AICAGE_IMAGE}" /bin/bash -lc \
+  run docker run --rm "${AICAGE_IMAGE}" /bin/bash -c \
     "git --version >/dev/null && python3 --version >/dev/null && node --version >/dev/null && npm --version >/dev/null"
   [ "$status" -eq 0 ]
 }
