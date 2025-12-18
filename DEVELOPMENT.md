@@ -32,8 +32,8 @@ pip install -r requirements-dev.txt
 
 `config.yaml` controls defaults:
 
-- `AICAGE_REPOSITORY` (default `wuodan/aicage`)
-- `AICAGE_IMAGE_BASE_REPOSITORY` (default `wuodan/aicage-image-base`)
+- `AICAGE_REPOSITORY` (default `ghcr.io/wuodan/aicage`)
+- `AICAGE_IMAGE_BASE_REPOSITORY` (default `ghcr.io/wuodan/aicage-image-base`)
 - `AICAGE_VERSION` (default `dev`)
 - `AICAGE_PLATFORMS` (default `linux/amd64 linux/arm64`)
 Base aliases are discovered from `<alias>-latest` tags in the base repository unless you override
@@ -53,7 +53,7 @@ scripts/util/build-all.sh
 
 ```bash
 # Test a specific image
-scripts/test.sh --image wuodan/aicage:codex-ubuntu-latest --tool codex
+scripts/test.sh --image ghcr.io/wuodan/aicage:codex-ubuntu-latest --tool codex
 
 # Test the full matrix (tags derived from config.yaml and available base aliases)
 scripts/test-all.sh
@@ -71,7 +71,7 @@ Smoke suites live in `tests/smoke/`; use `bats` directly if you need to run one 
 
 ## Working with bases
 
-Base layers come from `wuodan/aicage-image-base`. Add or modify bases in that repository, then ensure
+Base layers come from `ghcr.io/wuodan/aicage-image-base`. Add or modify bases in that repository, then ensure
 the desired `<base>-latest` tag exists (or set `AICAGE_BASE_ALIASES`) before building here.
 
 ## CI

@@ -1,7 +1,7 @@
 # aicage-image
 
 Final Docker images for [aicage](https://github.com/Wuodan/aicage). These images bundle the agent binaries on top of published
-base layers from `wuodan/aicage-image-base`.
+base layers from `ghcr.io/wuodan/aicage-image-base`.
 
 ## What’s included
 
@@ -11,15 +11,15 @@ base layers from `wuodan/aicage-image-base`.
 
 ## Tag format
 
-`${AICAGE_REPOSITORY:-wuodan/aicage}:<tool>-<base>-<version>`
+`${AICAGE_REPOSITORY:-ghcr.io/wuodan/aicage}:<tool>-<base>-<version>`
 
-- Example: `wuodan/aicage:codex-ubuntu-latest`
+- Example: `ghcr.io/wuodan/aicage:codex-ubuntu-latest`
 - `<base>-latest` tags map to the latest published base layer with that alias.
 
 ## Quick start
 
 ```bash
-docker pull wuodan/aicage:codex-ubuntu-latest
+docker pull ghcr.io/wuodan/aicage:codex-ubuntu-latest
 
 docker run -it --rm \
   -e OPENAI_API_KEY=sk-... \
@@ -27,7 +27,7 @@ docker run -it --rm \
   -e AICAGE_GID=$(id -g) \
   -e AICAGE_USER=$(id -un) \
   -v "$(pwd)":/workspace \
-  wuodan/aicage:cline-ubuntu-latest
+  ghcr.io/wuodan/aicage:cline-ubuntu-latest
 ```
 
 Swap `codex` for `cline` or `droid`, and choose any available `<base>` alias.

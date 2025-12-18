@@ -61,11 +61,11 @@ jobs:
           set -euo pipefail
           source scripts/common.sh
           load_config_file
-          BASE_IMAGE="${AICAGE_IMAGE_BASE_REPOSITORY}:${BASE_ALIAS}-latest"
           {
             echo "AICAGE_REPOSITORY=${AICAGE_REPOSITORY}"
             echo "AICAGE_IMAGE_BASE_REPOSITORY=${AICAGE_IMAGE_BASE_REPOSITORY}"
-            echo "BASE_IMAGE=${BASE_IMAGE}"
+            echo "AICAGE_IMAGE_REPOSITORY=${AICAGE_IMAGE_REPOSITORY}"
+            echo "BASE_IMAGE=${AICAGE_IMAGE_REGISTRY}/${AICAGE_IMAGE_BASE_REPOSITORY}:${BASE_ALIAS}-latest"
             echo "TOOL_PATH=$(get_tool_field "${TOOL}" tool_path)"
           } >> "$GITHUB_OUTPUT"
 
@@ -131,8 +131,9 @@ jobs:
       - name: "Publish: Log in to Docker Hub"
         uses: docker/login-action@v3.6.0
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Publish: Push architecture-specific image"
         run: |
@@ -202,8 +203,9 @@ jobs:
       - name: "Publish: Log in to Docker Hub"
         uses: docker/login-action@v3.6.0
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Publish: Push architecture-specific image"
         run: |
@@ -233,8 +235,9 @@ jobs:
       - name: "Log in to Docker Hub"
         uses: docker/login-action@v3.6.0
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Create and push multi-arch manifest"
         run: |
