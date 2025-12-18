@@ -24,17 +24,6 @@ load_config_file() {
   done < <(yq -er 'to_entries[] | [.key, (.value // "")] | @tsv' "${config_file}")
 }
 
-discover_base_aliases() {
-  local url="https://hub.docker.com/v2/repositories/${AICAGE_IMAGE_BASE_REPOSITORY}/tags?page_size=100"
-  local json next
-  while [[ -n "${url}" ]]; do
-    json="$(curl -fsSL "${url}")" || _die "Failed to query Docker Hub for ${AICAGE_IMAGE_BASE_REPOSITORY}"
-    jq -r '.results[].name | select(test("-latest$")) | sub("(-amd64|-arm64)?-latest$"; "")' <<< "${json}"
-    next="$(jq -r '.next // empty' <<< "${json}")"
-    url="${next}"
-  done | sort -u
-}
-
 get_tool_field() {
   local tool="$1"
   local field="$2"
@@ -48,4 +37,52 @@ get_tool_field() {
   value="$(yq -er ".${field}" "${definition_file}")" || _die "Failed to read ${field} from ${definition_file}"
   [[ -n "${value}" && "${value}" != "null" ]] || _die "${field} missing in ${definition_file}"
   printf '%s\n' "${value}"
+}
+
+# get anonymous pull token (public repo)
+ghcr_pull_token() {
+  local repo="$1"
+  local token
+  token="$(
+    curl -fsSL \
+      "${AICAGE_IMAGE_REGISTRY_API_TOKEN_URL}:${repo}:pull" \
+    | jq -r '.token'
+  )" || _die "Failed to get GHCR token"
+  echo "$token"
+}
+
+ghcr_list_all_tags() {
+  local repo="$1"
+  local url="${AICAGE_IMAGE_REGISTRY_API_URL}/${repo}/tags/list?n=1000"
+  local token resp body next
+
+  # 1) get pull token
+  token="$(ghcr_pull_token "$repo")"
+
+  # 2) paginate
+  while [[ -n "$url" ]]; do
+    resp="$(
+      curl -fsSL -i \
+        -H "Authorization: Bearer ${token}" \
+        "$url"
+    )" || _die "GHCR query failed"
+
+    # 2a) extract JSON body (after first empty line)
+    body="$(sed '1,/^\r\{0,1\}$/d' <<<"$resp")"
+
+    # 2b) output tags
+    jq -r '.tags[]?' <<<"$body"
+
+    # 2c) extract next-page URL from Link header (if any)
+    next="$(sed -n 's/.*<\([^>]*\)>;[[:space:]]*rel="next".*/\1/pI' <<<"$resp")"
+
+    url="$next"
+  done
+}
+
+discover_base_aliases() {
+  ghcr_list_all_tags "${AICAGE_IMAGE_BASE_REPOSITORY}" \
+    | grep -E -- '-latest$' \
+    | sed -E 's/(-amd64|-arm64)?-latest$//' \
+    | sort -u
 }

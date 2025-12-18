@@ -11,7 +11,7 @@ base layers from `ghcr.io/wuodan/aicage-image-base`.
 
 ## Tag format
 
-`${AICAGE_REPOSITORY:-ghcr.io/wuodan/aicage}:<tool>-<base>-<version>`
+`${AICAGE_IMAGE_REPOSITORY:-ghcr.io/wuodan/aicage}:<tool>-<base>-<version>`
 
 - Example: `ghcr.io/wuodan/aicage:codex-ubuntu-latest`
 - `<base>-latest` tags map to the latest published base layer with that alias.

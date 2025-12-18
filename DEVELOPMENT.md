@@ -28,16 +28,16 @@ pip install -r requirements-dev.txt
 - `tests/smoke/` — Bats suites that verify each tool’s image.
 - `config.yaml` — Default repositories, platforms, and version tags.
 
-## Key configuration
+## Configuration
 
-`config.yaml` controls defaults:
+Setting from `config.yaml`:
 
-- `AICAGE_REPOSITORY` (default `ghcr.io/wuodan/aicage`)
-- `AICAGE_IMAGE_BASE_REPOSITORY` (default `ghcr.io/wuodan/aicage-image-base`)
+- `AICAGE_IMAGE_REGISTRY` (default `ghcr.io`)
+- `AICAGE_IMAGE_BASE_REPOSITORY` (default `wuodan/aicage-image-base`)
+- `AICAGE_IMAGE_REPOSITORY` (default `ghcr.io/wuodan/aicage`)
 - `AICAGE_VERSION` (default `dev`)
-- `AICAGE_PLATFORMS` (default `linux/amd64 linux/arm64`)
-Base aliases are discovered from `<alias>-latest` tags in the base repository unless you override
-`AICAGE_BASE_ALIASES`.
+
+Base aliases are discovered from `<alias>-latest` tags in the base repository.
 
 ## Build
 
@@ -72,7 +72,7 @@ Smoke suites live in `tests/smoke/`; use `bats` directly if you need to run one 
 ## Working with bases
 
 Base layers come from `ghcr.io/wuodan/aicage-image-base`. Add or modify bases in that repository, then ensure
-the desired `<base>-latest` tag exists (or set `AICAGE_BASE_ALIASES`) before building here.
+the desired `<base>-latest` tag exists before building here.
 
 ## CI
 

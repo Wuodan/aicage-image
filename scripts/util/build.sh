@@ -66,15 +66,14 @@ done
 load_config_file
 
 BASE_IMAGE="${AICAGE_IMAGE_BASE_REPOSITORY}:${BASE_ALIAS}-latest"
-VERSION_TAG="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${AICAGE_VERSION}"
-LATEST_TAG="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
-DESCRIPTION="Agent image for ${TOOL}"
-TOOL_PATH_LABEL="$(get_tool_field "${TOOL}" tool_path)"
+VERSION_TAG="${AICAGE_IMAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${AICAGE_VERSION}"
+LATEST_TAG="${AICAGE_IMAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
+TOOL_PATH="$(get_tool_field "${TOOL}" tool_path)"
 
 (
   echo "[build] Tool=${TOOL}"
   echo "Base=${BASE_ALIAS}"
-  echo "Repo=${AICAGE_REPOSITORY}"
+  echo "Repo=${AICAGE_IMAGE_REPOSITORY}"
   echo "Version=${AICAGE_VERSION}"
   echo "BaseImage=${BASE_IMAGE}"
   echo "Tags=${VERSION_TAG},${LATEST_TAG}"
@@ -83,8 +82,8 @@ TOOL_PATH_LABEL="$(get_tool_field "${TOOL}" tool_path)"
 docker build \
   --build-arg "BASE_IMAGE=${BASE_IMAGE}" \
   --build-arg "TOOL=${TOOL}" \
-  --label "tool_path=${TOOL_PATH_LABEL}" \
-  --label "org.opencontainers.image.description=${DESCRIPTION}" \
+  --label "tool_path=${TOOL_PATH}" \
+  --label "org.opencontainers.image.description=Agent image for ${TOOL}" \
   --tag "${VERSION_TAG}" \
   --tag "${LATEST_TAG}" \
   "${ROOT_DIR}"

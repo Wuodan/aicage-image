@@ -1,5 +1,7 @@
 # aicage settings
-AICAGE_REPOSITORY: ghcr.io/wuodan/aicage
-AICAGE_IMAGE_BASE_REPOSITORY: ghcr.io/wuodan/aicage-image-base
+AICAGE_IMAGE_REGISTRY: ghcr.io
+AICAGE_IMAGE_REGISTRY_API_URL: https://ghcr.io/v2
+AICAGE_IMAGE_REGISTRY_API_TOKEN_URL: https://ghcr.io/token?service=ghcr.io&scope=repository
+AICAGE_IMAGE_BASE_REPOSITORY: wuodan/aicage-image-base
+AICAGE_IMAGE_REPOSITORY: wuodan/aicage
 AICAGE_VERSION: dev
-AICAGE_PLATFORMS: "linux/amd64 linux/arm64"

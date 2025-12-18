@@ -37,8 +37,9 @@ jobs:
       AICAGE_VERSION: ${{ github.ref_name }}
       ROOT_DIR: ${{ github.workspace }}
     outputs:
-      AICAGE_REPOSITORY: ${{ steps.config.outputs.AICAGE_REPOSITORY }}
+      AICAGE_IMAGE_REGISTRY: ${{ steps.config.outputs.AICAGE_IMAGE_REGISTRY }}
       AICAGE_IMAGE_BASE_REPOSITORY: ${{ steps.config.outputs.AICAGE_IMAGE_BASE_REPOSITORY }}
+      AICAGE_IMAGE_REPOSITORY: ${{ steps.config.outputs.AICAGE_IMAGE_REPOSITORY }}
       BASE_IMAGE: ${{ steps.config.outputs.BASE_IMAGE }}
       TOOL_PATH: ${{ steps.config.outputs.TOOL_PATH }}
 
@@ -62,7 +63,7 @@ jobs:
           source scripts/common.sh
           load_config_file
           {
-            echo "AICAGE_REPOSITORY=${AICAGE_REPOSITORY}"
+            echo "AICAGE_IMAGE_REGISTRY=${AICAGE_IMAGE_REGISTRY}"
             echo "AICAGE_IMAGE_BASE_REPOSITORY=${AICAGE_IMAGE_BASE_REPOSITORY}"
             echo "AICAGE_IMAGE_REPOSITORY=${AICAGE_IMAGE_REPOSITORY}"
             echo "BASE_IMAGE=${AICAGE_IMAGE_REGISTRY}/${AICAGE_IMAGE_BASE_REPOSITORY}:${BASE_ALIAS}-latest"
@@ -79,7 +80,8 @@ jobs:
       BASE_ALIAS: ${{ inputs.base }}
       BASE_IMAGE: ${{ needs.load_config.outputs.BASE_IMAGE }}
       TOOL: ${{ inputs.tool }}
-      AICAGE_REPOSITORY: ${{ needs.load_config.outputs.AICAGE_REPOSITORY }}
+      AICAGE_IMAGE_REGISTRY: ${{ needs.load_config.outputs.AICAGE_IMAGE_REGISTRY }}
+      AICAGE_IMAGE_REPOSITORY: ${{ needs.load_config.outputs.AICAGE_IMAGE_REPOSITORY }}
       AICAGE_VERSION: ${{ github.ref_name }}
     outputs:
       VERSION_TAG: ${{ steps.config.outputs.VERSION_TAG }}
@@ -93,8 +95,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          VERSION_TAG="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${ARCH_SUFFIX}-${AICAGE_VERSION}"
-          LATEST_TAG="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${ARCH_SUFFIX}-latest"
+          VERSION_TAG="${AICAGE_IMAGE_REGISTRY}/${AICAGE_IMAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${ARCH_SUFFIX}-${AICAGE_VERSION}"
+          LATEST_TAG="${AICAGE_IMAGE_REGISTRY}/${AICAGE_IMAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${ARCH_SUFFIX}-latest"
           {
             echo "VERSION_TAG=${VERSION_TAG}"
             echo "LATEST_TAG=${LATEST_TAG}"
@@ -151,7 +153,8 @@ jobs:
       BASE_ALIAS: ${{ inputs.base }}
       BASE_IMAGE: ${{ needs.load_config.outputs.BASE_IMAGE }}
       TOOL: ${{ inputs.tool }}
-      AICAGE_REPOSITORY: ${{ needs.load_config.outputs.AICAGE_REPOSITORY }}
+      AICAGE_IMAGE_REGISTRY: ${{ needs.load_config.outputs.AICAGE_IMAGE_REGISTRY }}
+      AICAGE_IMAGE_REPOSITORY: ${{ needs.load_config.outputs.AICAGE_IMAGE_REPOSITORY }}
       AICAGE_VERSION: ${{ github.ref_name }}
     outputs:
       VERSION_TAG: ${{ steps.config.outputs.VERSION_TAG }}
@@ -165,8 +168,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          VERSION_TAG="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${ARCH_SUFFIX}-${AICAGE_VERSION}"
-          LATEST_TAG="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${ARCH_SUFFIX}-latest"
+          VERSION_TAG="${AICAGE_IMAGE_REGISTRY}/${AICAGE_IMAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${ARCH_SUFFIX}-${AICAGE_VERSION}"
+          LATEST_TAG="${AICAGE_IMAGE_REGISTRY}/${AICAGE_IMAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${ARCH_SUFFIX}-latest"
           {
             echo "VERSION_TAG=${VERSION_TAG}"
             echo "LATEST_TAG=${LATEST_TAG}"
@@ -220,7 +223,8 @@ jobs:
     env:
       TOOL: ${{ inputs.tool }}
       BASE_ALIAS: ${{ inputs.base }}
-      AICAGE_REPOSITORY: ${{ needs.load_config.outputs.AICAGE_REPOSITORY }}
+      AICAGE_IMAGE_REGISTRY: ${{ needs.load_config.outputs.AICAGE_IMAGE_REGISTRY }}
+      AICAGE_IMAGE_REPOSITORY: ${{ needs.load_config.outputs.AICAGE_IMAGE_REPOSITORY }}
       AICAGE_VERSION: ${{ github.ref_name }}
 
     steps:
@@ -242,8 +246,8 @@ jobs:
       - name: "Create and push multi-arch manifest"
         run: |
           set -euo pipefail
-          VERSION_TAG="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${AICAGE_VERSION}"
-          LATEST_TAG="${AICAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
+          VERSION_TAG="${AICAGE_IMAGE_REGISTRY}/${AICAGE_IMAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-${AICAGE_VERSION}"
+          LATEST_TAG="${AICAGE_IMAGE_REGISTRY}/${AICAGE_IMAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
 
           docker buildx imagetools create \
             -t "${VERSION_TAG}" \
