@@ -8,7 +8,7 @@ ARG TOOL
 
 LABEL org.opencontainers.image.title="aicage" \
       org.opencontainers.image.description="Multi-base build for agentic developer CLIs" \
-      org.opencontainers.image.source="https://github.com/Wuodan/aicage-image" \
+      org.opencontainers.image.source="https://github.com/aicage/aicage-image" \
       org.opencontainers.image.licenses="Apache-2.0"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
