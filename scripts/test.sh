@@ -2,10 +2,9 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SMOKE_DIR="${ROOT_DIR}/tests/smoke"
+SMOKE_DIR="${ROOT_DIR}/tests/smoke/"
 IMAGE_REF=""
 TOOL=""
-BATS_TOOL_FILE="${SMOKE_DIR}/tool.bats"
 
 usage() {
   cat <<'USAGE'
@@ -53,10 +52,5 @@ done
 [[ -n "${IMAGE_REF}" ]] || { log "--image is required"; usage; }
 [[ -n "${TOOL}" ]] || { log "--tool is required"; usage; }
 
-if [[ ! -e "${BATS_TOOL_FILE}" ]]; then
-  log "Smoke tests not found at ${BATS_TOOL_FILE}."
-  exit 1
-fi
-
 log "Running smoke tests via bats"
-AICAGE_IMAGE="${IMAGE_REF}" TOOL="${TOOL}" bats "${BATS_TOOL_FILE}" "$@"
+AICAGE_IMAGE="${IMAGE_REF}" TOOL="${TOOL}" bats "${SMOKE_DIR}" "$@"

@@ -31,17 +31,3 @@ setup() {
     "git --version >/dev/null && python3 --version >/dev/null && node --version >/dev/null && npm --version >/dev/null"
   [ "$status" -eq 0 ]
 }
-
-@test "tool_metadata_labels_present" {
-  ROOt_DIR="$(pwd)"
-  source scripts/common.sh
-  TOOL_PATH="$(get_tool_field "${TOOL}" tool_path)"
-
-  run docker inspect --format '{{ index .Config.Labels "tool_path" }}' "${AICAGE_IMAGE}"
-  [ "$status" -eq 0 ]
-  [ "$output" = "${TOOL_PATH}" ]
-
-  run docker inspect --format '{{ index .Config.Labels "org.opencontainers.image.description" }}' "${AICAGE_IMAGE}"
-  [ "$status" -eq 0 ]
-  [ "$output" = "Agent image for ${TOOL}" ]
-}
