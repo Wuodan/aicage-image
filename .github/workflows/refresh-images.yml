@@ -36,6 +36,11 @@ jobs:
           source scripts/refresh-images-lib.sh
           load_config_file
 
+          FORCE_BUILD="false"
+          if [[ "${GITHUB_EVENT_NAME}" == "push" || "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            FORCE_BUILD="true"
+          fi
+
           BASE_ALIASES="$(discover_base_aliases)"
 
           for dir in tools/*; do
@@ -48,7 +53,10 @@ jobs:
             fi
 
             for BASE_ALIAS in ${BASE_ALIASES}; do
-              if needs_rebuild "${TOOL}" "${BASE_ALIAS}" "${TOOL_VERSION}"; then
+              if [[ "${FORCE_BUILD}" == "true" ]]; then
+                echo "Forcing build for ${TOOL} (${BASE_ALIAS}) due to ${GITHUB_EVENT_NAME}"
+                gh workflow run build.yml --ref "${REF}" -f tool="${TOOL}" -f base="${BASE_ALIAS}"
+              elif needs_rebuild "${TOOL}" "${BASE_ALIAS}" "${TOOL_VERSION}"; then
                 echo "Dispatching ${TOOL} (${BASE_ALIAS}) for ${REF}"
                 gh workflow run build.yml --ref "${REF}" -f tool="${TOOL}" -f base="${BASE_ALIAS}"
               else
