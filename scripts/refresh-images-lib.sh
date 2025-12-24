@@ -31,29 +31,45 @@ needs_rebuild() {
 
   for arch in amd64 arm64; do
     local base_digest
-    base_digest="$(get_manifest_digest "${base_image}" "${arch}")"
+    if ! base_digest="$(get_manifest_digest "${base_image}" "${arch}")"; then
+      echo "Failed to get ${arch} digest for ${base_image}" >&2
+      return 2
+    fi
     if [[ -z "${base_digest}" ]]; then
       echo "Missing ${arch} digest for ${base_image}"
       return 0
     fi
 
     local final_digest
-    final_digest="$(get_manifest_digest "${final_image}" "${arch}")"
+    if ! final_digest="$(get_manifest_digest "${final_image}" "${arch}")"; then
+      echo "Failed to get ${arch} digest for ${final_image}" >&2
+      return 2
+    fi
     if [[ -z "${final_digest}" ]]; then
       echo "Missing ${arch} digest for ${final_image}"
       return 0
     fi
 
     local base_last_layer
-    base_last_layer="$(get_last_layer "${base_repo}" "${base_digest}")"
+    if ! base_last_layer="$(get_last_layer "${base_repo}" "${base_digest}")"; then
+      echo "Failed to get last layer for ${base_repo}@${base_digest}" >&2
+      return 2
+    fi
     if [[ -z "${base_last_layer}" ]]; then
       echo "Missing last layer for ${base_repo}@${base_digest}"
       return 0
     fi
 
-    if ! skopeo inspect "docker://${final_repo}@${final_digest}" \
-      | jq -r '.Layers[]' \
-      | grep -Fxq "${base_last_layer}"; then
+    local final_layers
+    if ! final_layers="$(
+      skopeo inspect "docker://${final_repo}@${final_digest}" \
+        | jq -r '.Layers[]'
+    )"; then
+      echo "Failed to inspect layers for ${final_repo}@${final_digest}" >&2
+      return 2
+    fi
+
+    if ! printf '%s\n' "${final_layers}" | grep -Fxq "${base_last_layer}"; then
       echo "${final_repo}@${final_digest} missing base layer ${base_last_layer} (${arch})"
       return 0
     fi

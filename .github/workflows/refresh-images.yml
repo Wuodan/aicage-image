@@ -62,7 +62,14 @@ jobs:
                 echo "Dispatching ${TOOL} (${BASE_ALIAS}) for ${REF}"
                 gh workflow run build.yml --ref "${REF}" -f tool="${TOOL}" -f base="${BASE_ALIAS}"
               else
-                echo "Up-to-date ${TOOL} (${BASE_ALIAS})"
+                # status from needs_rebuild
+                status=$?
+                if [[ "${status}" -eq 1 ]]; then
+                  echo "Up-to-date ${TOOL} (${BASE_ALIAS})"
+                else
+                  echo "Failed to determine rebuild for ${TOOL} (${BASE_ALIAS})" >&2
+                  exit 1
+                fi
               fi
             done
           done
