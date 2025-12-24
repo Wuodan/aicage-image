@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x
 
-pipx install goose-ai
+curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | \
+  GOOSE_BIN_DIR=/usr/local/bin \
+  CONFIGURE=false \
+  bash
