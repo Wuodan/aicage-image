@@ -6,7 +6,7 @@ run-name: Refresh tool-version images (${{ github.ref_name }})
     tags:
       - "*"
   schedule:
-    - cron: "*/20 * * * *"
+    - cron: "7,27,47 * * * *"
   workflow_dispatch: {}
 
 concurrency:
