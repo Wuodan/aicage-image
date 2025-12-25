@@ -23,7 +23,8 @@ jobs:
           scripts/util/generate-images-metadata.sh \
             --config config.yaml \
             --tools-dir tools \
-            --output images-metadata.yaml
+            --output images-metadata.yaml \
+            --image-tag "${{ github.ref_name }}"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2

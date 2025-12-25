@@ -3,12 +3,13 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/util/generate-images-metadata.sh --output <path> [options]
+Usage: scripts/util/generate-images-metadata.sh --output <path> --image-tag <tag> [options]
 
 Options:
   --config <path>     Path to config.yaml (default: config.yaml)
   --tools-dir <path>  Path to tools directory (default: tools)
   --output <path>     Output YAML file path (required)
+  --image-tag <value> Release tag for aicage-image (required)
   -h, --help          Show this help and exit
 USAGE
   exit 1
@@ -23,6 +24,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CONFIG_PATH="${ROOT_DIR}/config.yaml"
 TOOLS_DIR="${ROOT_DIR}/tools"
 OUTPUT_PATH=""
+IMAGE_TAG=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -41,6 +43,11 @@ while [[ $# -gt 0 ]]; do
       OUTPUT_PATH="$2"
       shift 2
       ;;
+    --image-tag)
+      [[ $# -ge 2 ]] || die "--image-tag requires a value"
+      IMAGE_TAG="$2"
+      shift 2
+      ;;
     -h|--help)
       usage
       ;;
@@ -51,6 +58,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "${OUTPUT_PATH}" ]] || die "--output is required"
+[[ -n "${IMAGE_TAG}" ]] || die "--image-tag is required"
 
 ROOT_DIR="$(cd "$(dirname "${CONFIG_PATH}")" && pwd)"
 if [[ "${TOOLS_DIR}" != /* ]]; then
@@ -66,7 +74,12 @@ BASES_TMPDIR="$(download_bases_archive)"
 BASES_DIR="${BASES_TMPDIR}/bases"
 
 tmp_output="$(mktemp)"
-yq -n '{"bases": {}, "tool": {}}' > "${tmp_output}"
+yq -n '{"aicage-image": {}, "aicage-image-base": {}, "bases": {}, "tool": {}}' > "${tmp_output}"
+
+ yq -i '.["aicage-image"].version = "'"${IMAGE_TAG}"'"' "${tmp_output}"
+
+BASE_TAG="$(get_base_release_tag)"
+yq -i '.["aicage-image-base"].version = "'"${BASE_TAG}"'"' "${tmp_output}"
 
 for alias in $(list_base_aliases "${BASES_DIR}"); do
   base_yaml="${BASES_DIR}/${alias}/base.yaml"
