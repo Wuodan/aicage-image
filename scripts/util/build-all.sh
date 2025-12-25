@@ -45,10 +45,10 @@ load_config_file
 
 TOOLS_DIR="${ROOT_DIR}/tools"
 BASES_TMPDIR="$(download_bases_archive)"
-AICAGE_BASE_ALIASES="${AICAGE_BASE_ALIASES:-$(list_base_aliases "${BASES_TMPDIR}/bases")}"
 
 for tool_dir in "${TOOLS_DIR}"/*; do
   tool="$(basename "${tool_dir}")"
+  AICAGE_BASE_ALIASES="$(get_bases "${tool}" "${BASES_TMPDIR}/bases" "${AICAGE_BASE_ALIASES:-}")"
   for base_alias in ${AICAGE_BASE_ALIASES}; do
     echo "[build-all] Building ${tool}-${base_alias}" >&2
     "${ROOT_DIR}/scripts/util/build.sh" \

@@ -66,6 +66,7 @@ Smoke suites live in `tests/smoke/`; use `bats` directly if you need to run one 
 
 1. Create `tools/<tool>/install.sh` (executable) that installs the agent; fail fast on errors.
 2. Add `tools/<tool>/tool.yaml` with any metadata that should appear as image labels.
+   Optional filters: `base_exclude` and `base_distro_exclude` (lists).
 3. Add the tool to `AICAGE_TOOLS` in `config.yaml` if it isn’t discovered automatically.
 4. Add smoke coverage in `tests/smoke/<tool>.bats`.
 5. Document the tool in `README.md` if it should be visible to users.

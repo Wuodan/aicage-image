@@ -59,6 +59,12 @@ done
 
 load_config_file
 
+BASES_TMPDIR="$(download_bases_archive)"
+ALLOWED_BASES="$(get_bases "${TOOL}" "${BASES_TMPDIR}/bases" "${BASE_ALIAS}")"
+if ! printf '%s\n' "${ALLOWED_BASES}" | grep -Fxq "${BASE_ALIAS}"; then
+  die "Base '${BASE_ALIAS}' is excluded for tool '${TOOL}'"
+fi
+
 BASE_IMAGE="${AICAGE_IMAGE_REGISTRY}/${AICAGE_IMAGE_BASE_REPOSITORY}:${BASE_ALIAS}-latest"
 TOOL_VERSION="$("${ROOT_DIR}/tools/${TOOL}/version.sh")"
 [[ -n "${TOOL_VERSION}" ]] || die "Tool version is empty for ${TOOL}"

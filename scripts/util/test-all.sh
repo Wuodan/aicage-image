@@ -14,11 +14,11 @@ source "${ROOT_DIR}/scripts/common.sh"
 load_config_file
 
 BASES_TMPDIR="$(download_bases_archive)"
-AICAGE_BASE_ALIASES="${AICAGE_BASE_ALIASES:-$(list_base_aliases "${BASES_TMPDIR}/bases")}"
 TOOLS_DIR="${ROOT_DIR}/tools"
 
 for tool_dir in "${TOOLS_DIR}"/*; do
   TOOL="$(basename "${tool_dir}")"
+  AICAGE_BASE_ALIASES="$(get_bases "${TOOL}" "${BASES_TMPDIR}/bases" "${AICAGE_BASE_ALIASES:-}")"
   for BASE_ALIAS in ${AICAGE_BASE_ALIASES}; do
     IMAGE="${AICAGE_IMAGE_REPOSITORY}:${TOOL}-${BASE_ALIAS}-latest"
     echo "[test-all] Testing ${IMAGE}" >&2

@@ -44,7 +44,6 @@ jobs:
           fi
 
           BASES_TMPDIR="$(download_bases_archive)"
-          BASE_ALIASES="$(list_base_aliases "${BASES_TMPDIR}/bases")"
 
           for dir in tools/*; do
             [ -d "${dir}" ] || continue
@@ -54,6 +53,7 @@ jobs:
               echo "Tool version is empty for ${TOOL}" >&2
               exit 1
             fi
+            BASE_ALIASES="$(get_bases "${TOOL}" "${BASES_TMPDIR}/bases")"
 
             for BASE_ALIAS in ${BASE_ALIASES}; do
               if [[ "${FORCE_BUILD}" == "true" ]]; then

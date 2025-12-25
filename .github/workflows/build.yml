@@ -86,6 +86,12 @@ jobs:
             echo "Tool version is empty for ${TOOL}" >&2
             exit 1
           fi
+          BASES_TMPDIR="$(download_bases_archive)"
+          ALLOWED_BASES="$(get_bases "${TOOL}" "${BASES_TMPDIR}/bases" "${BASE_ALIAS}")"
+          if ! printf '%s\n' "${ALLOWED_BASES}" | grep -Fxq "${BASE_ALIAS}"; then
+            echo "Base '${BASE_ALIAS}' is excluded for tool '${TOOL}'" >&2
+            exit 1
+          fi
           {
             echo "AICAGE_IMAGE_REGISTRY=${AICAGE_IMAGE_REGISTRY}"
             echo "AICAGE_IMAGE_BASE_REPOSITORY=${AICAGE_IMAGE_BASE_REPOSITORY}"

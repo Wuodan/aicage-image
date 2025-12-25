@@ -39,6 +39,19 @@ get_tool_field() {
   printf '%s\n' "${value}"
 }
 
+get_tool_list_field() {
+  local tool="$1"
+  local field="$2"
+  local tool_dir="${TOOL_DEFINITIONS_DIR}/${tool}"
+  local definition_file="${tool_dir}/tool.yaml"
+
+  [[ -d "${tool_dir}" ]] || _die "Tool '${tool}' not found under ${TOOL_DEFINITIONS_DIR}"
+  [[ -f "${definition_file}" ]] || _die "Missing tool.yaml for '${tool}'"
+
+  yq -r ".${field} // [] | .[]" "${definition_file}" \
+    || _die "Failed to read ${field} from ${definition_file}"
+}
+
 download_bases_archive() {
   local base_repo="${AICAGE_IMAGE_BASE_REPOSITORY}"
   local url="https://github.com/${base_repo}/releases/latest/download/bases.tar.gz"
@@ -71,4 +84,68 @@ list_base_aliases() {
     basename "${dir}"
   done | sort -u
   shopt -u nullglob
+}
+
+normalize_value() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+list_contains() {
+  local needle="$1"
+  shift
+  local item
+
+  for item in "$@"; do
+    if [[ "${item}" == "${needle}" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+get_bases() {
+  local tool="$1"
+  local bases_dir="$2"
+  local base_list="${3:-}"
+  local base_aliases
+  local -a base_exclude base_distro_exclude
+  local alias alias_lc base_yaml distro distro_lc
+
+  [[ -n "${tool}" ]] || _die "Tool name required for base discovery"
+  [[ -n "${bases_dir}" ]] || _die "Bases directory required for base discovery"
+
+  if [[ -n "${base_list}" ]]; then
+    base_aliases="${base_list}"
+  else
+    base_aliases="$(list_base_aliases "${bases_dir}")"
+  fi
+
+  mapfile -t base_exclude < <(
+    get_tool_list_field "${tool}" base_exclude | tr '[:upper:]' '[:lower:]'
+  )
+  mapfile -t base_distro_exclude < <(
+    get_tool_list_field "${tool}" base_distro_exclude | tr '[:upper:]' '[:lower:]'
+  )
+
+  while IFS= read -r alias; do
+    [[ -n "${alias}" ]] || continue
+    alias_lc="$(normalize_value "${alias}")"
+    if list_contains "${alias_lc}" "${base_exclude[@]:-}"; then
+      continue
+    fi
+
+    if [[ ${#base_distro_exclude[@]} -gt 0 ]]; then
+      base_yaml="${bases_dir}/${alias}/base.yaml"
+      [[ -f "${base_yaml}" ]] || _die "Missing base.yaml for ${alias} in ${bases_dir}"
+      distro="$(yq -er '.base_image_distro' "${base_yaml}")" \
+        || _die "Failed to read base_image_distro from ${base_yaml}"
+      distro_lc="$(normalize_value "${distro}")"
+      if list_contains "${distro_lc}" "${base_distro_exclude[@]}"; then
+        continue
+      fi
+    fi
+
+    printf '%s\n' "${alias}"
+  done < <(printf '%s\n' ${base_aliases})
 }
