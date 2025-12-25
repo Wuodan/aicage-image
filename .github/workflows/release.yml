@@ -4,7 +4,6 @@ name: Release
   push:
     tags:
       - "*"
-  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -32,6 +31,15 @@ jobs:
           ruff check .
           pymarkdown --config .pymarkdown.json scan .
 
+      - name: "Test: Validate config and tools with schemas"
+        run: |
+          check-jsonschema \
+            --schemafile doc/validation/tool.schema.json \
+            tools/*/tool.yaml
+          check-jsonschema \
+            --schemafile doc/validation/config.schema.json \
+            config.yaml
+
       - name: "Release: Generate images metadata"
         run: |
           scripts/util/generate-images-metadata.sh \
@@ -44,7 +52,7 @@ jobs:
         run: |
           yq '.' images-metadata.yaml > images-metadata.json
           check-jsonschema \
-            --schemafile doc/images-metadata.schema.json \
+            --schemafile doc/validation/images-metadata.schema.json \
             images-metadata.json
 
       - name: "Release: Package tools"

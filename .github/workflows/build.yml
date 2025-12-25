@@ -66,7 +66,16 @@ jobs:
           ruff check .
           pymarkdown --config .pymarkdown.json scan .
 
-      - name: Validate tool
+      - name: "Test: Validate config and tools with schemas"
+        run: |
+          check-jsonschema \
+            --schemafile doc/validation/tool.schema.json \
+            tools/*/tool.yaml
+          check-jsonschema \
+            --schemafile doc/validation/config.schema.json \
+            config.yaml
+
+      - name: "Test: Validate tool"
         shell: bash
         run: |
           set -euo pipefail
