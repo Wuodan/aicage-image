@@ -12,6 +12,16 @@ _die() {
   fi
 }
 
+# add retry and other params to reduce failure in pipelines
+curl_wrapper() {
+  curl -fsSL \
+    --retry 8 \
+    --retry-all-errors \
+    --retry-delay 2 \
+    --max-time 600 \
+    "$@"
+}
+
 load_config_file() {
   local config_file="${ROOT_DIR}/config.yaml"
   [[ -f "${config_file}" ]] || _die "Config file not found: ${config_file}"
@@ -59,7 +69,7 @@ download_bases_archive() {
 
   tmpdir="$(mktemp -d)" || _die "Failed to create temp dir"
 
-  if ! curl -fsSL "${url}" -o "${tmpdir}/bases.tar.gz"; then
+  if ! curl_wrapper "${url}" -o "${tmpdir}/bases.tar.gz"; then
     _die "Failed to download ${url}"
   fi
 
@@ -80,7 +90,7 @@ get_base_release_tag() {
   local location
 
   location="$(
-    curl -fsSLI "${latest_url}" \
+    curl_wrapper -I "${latest_url}" \
       | sed -n 's/^location:[[:space:]]*//Ip' \
       | tr -d '\r' \
       | tail -n 1
