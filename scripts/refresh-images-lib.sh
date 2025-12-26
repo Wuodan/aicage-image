@@ -4,15 +4,63 @@ set -euo pipefail
 get_manifest_digest() {
   local image="$1"
   local arch="$2"
-  skopeo inspect --raw "docker://${image}" \
-    | jq -r --arg arch "${arch}" '.manifests[]? | select(.platform.architecture == $arch) | .digest' \
-    | head -n 1
+  local manifest
+  local digest
+
+  if ! manifest="$(run_cmd "skopeo inspect --raw ${image}" \
+    skopeo inspect --raw "docker://${image}")"; then
+    return 1
+  fi
+
+  if ! digest="$(run_cmd "jq digest ${image} ${arch}" \
+    jq -r --arg arch "${arch}" '.manifests[]? | select(.platform.architecture == $arch) | .digest' \
+    <<<"${manifest}")"; then
+    return 1
+  fi
+
+  printf '%s\n' "${digest}" | head -n 1
 }
 
 get_last_layer() {
   local image_repo="$1"
   local digest="$2"
-  skopeo inspect "docker://${image_repo}@${digest}" | jq -r '.Layers[]' | tail -n 1
+  local manifest
+  local layer
+
+  if ! manifest="$(run_cmd "skopeo inspect ${image_repo}@${digest}" \
+    skopeo inspect "docker://${image_repo}@${digest}")"; then
+    return 1
+  fi
+
+  if ! layer="$(run_cmd "jq layers ${image_repo}@${digest}" \
+    jq -r '.Layers[]' <<<"${manifest}")"; then
+    return 1
+  fi
+
+  printf '%s\n' "${layer}" | tail -n 1
+}
+
+run_cmd() {
+  local label="$1"
+  shift
+  local out_file err_file status
+
+  out_file="$(mktemp)"
+  err_file="$(mktemp)"
+  if "$@" >"${out_file}" 2>"${err_file}"; then
+    cat "${out_file}"
+    rm -f "${out_file}" "${err_file}"
+    return 0
+  fi
+
+  status=$?
+  echo "Command failed (${label}) [exit ${status}]" >&2
+  echo "  $*" >&2
+  if [[ -s "${err_file}" ]]; then
+    sed 's/^/  /' "${err_file}" >&2
+  fi
+  rm -f "${out_file}" "${err_file}"
+  return "${status}"
 }
 
 needs_rebuild() {
@@ -61,11 +109,12 @@ needs_rebuild() {
     fi
 
     local final_layers
-    if ! final_layers="$(
-      skopeo inspect "docker://${final_repo}@${final_digest}" \
-        | jq -r '.Layers[]'
-    )"; then
-      echo "Failed to inspect layers for ${final_repo}@${final_digest}" >&2
+    if ! final_layers="$(run_cmd "skopeo inspect ${final_repo}@${final_digest}" \
+      skopeo inspect "docker://${final_repo}@${final_digest}")"; then
+      return 2
+    fi
+    if ! final_layers="$(run_cmd "jq layers ${final_repo}@${final_digest}" \
+      jq -r '.Layers[]' <<<"${final_layers}")"; then
       return 2
     fi
 
