@@ -143,7 +143,7 @@ needs_rebuild() {
       return 2
     fi
 
-    if ! printf '%s\n' "${final_layers}" | grep -Fxq "${base_last_layer}"; then
+    if ! grep -Fxq "${base_last_layer}" <<<"${final_layers}"; then
       echo "${final_repo}@${final_digest} missing base layer ${base_last_layer} (${arch})"
       return 0
     fi
@@ -170,7 +170,7 @@ append_build() {
 
 print_needs_rebuild_output() {
   [[ -n "${NEEDS_REBUILD_OUTPUT:-}" ]] || return 0
-  printf '%s\n' "${NEEDS_REBUILD_OUTPUT}" | sed 's/^/  /'
+  printf '  %s\n' "${NEEDS_REBUILD_OUTPUT//$'\n'/$'\n  '}"
 }
 
 # Run needs_rebuild while preserving its stdout/stderr for later logging.

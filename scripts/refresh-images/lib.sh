@@ -33,7 +33,7 @@ get_manifest_digest() {
     return 1
   fi
 
-  printf '%s\n' "${digest}" | head -n 1
+  head -n 1 <<<"${digest}"
 }
 
 # Resolve the last layer digest from a manifest identified by digest.
@@ -59,7 +59,7 @@ get_last_layer() {
     return 1
   fi
 
-  printf '%s\n' "${layer}" | tail -n 1
+  tail -n 1 <<<"${layer}"
 }
 
 # Run a command, capture stdout/stderr separately, and upgrade failures with a stable label.
